@@ -112,18 +112,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);-we
 .scroll-hint{
   position:absolute;
   right:0; top:0; bottom:0;
-  width:48px;
+  width:64px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:1.1rem;
-  color:var(--muted);
-  background:linear-gradient(to right, transparent, var(--bg) 60%);
+  font-size:1.8rem;
+  color:var(--danger);
+  background:linear-gradient(to right, transparent, var(--bg) 55%);
   pointer-events:none;
   transition:opacity 0.4s;
   animation:scrollPulse 1.8s ease-in-out infinite;
 }
-@keyframes scrollPulse{0%,100%{opacity:1;transform:translateX(0);}50%{opacity:0.3;transform:translateX(4px);}}
+@keyframes scrollPulse{0%,100%{opacity:1;transform:translateX(0);}50%{opacity:0.2;transform:translateX(6px);}}
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;border-top:1px solid var(--line);border-left:1px solid var(--line);margin-bottom:2rem;}
 .summary-card{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:1rem 1.25rem;}
 .summary-label{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;}
