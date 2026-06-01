@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOSAN — SS27 Survey</title>
+<link rel="icon" type="image/png" href="isologo.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fff;
+  --surface: #fafafa;
+  --text: #0a0a0a;
+  --muted: #8a8a8a;
+  --line: #e8e8e8;
+  --line-dark: #d0d0d0;
+  --danger: #c8102e;
+  --success: #1a7f5a;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 100;
+}
+.header-logo { height: 28px; width: auto; }
+.header-step { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+
+.view { display: none; min-height: calc(100vh - 70px); }
+.view.active { display: flex; flex-direction: column; }
+
+.progress-bar { height: 2px; background: var(--line); width: 100%; }
+.progress-fill { height: 100%; background: var(--text); transition: width 0.5s ease; }
+
+.survey-body {
+  flex: 1;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 3rem 2rem 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.q-block { display: flex; flex-direction: column; gap: 1.25rem; }
+.q-label { font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); }
+.q-text { font-size: 1.3rem; font-weight: 400; line-height: 1.4; letter-spacing: -0.01em; }
+.q-text em { font-style: italic; font-weight: 300; }
+.q-hint { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+.input-field {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--line-dark);
+  background: transparent;
+  padding: 0.75rem 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input-field:focus { border-bottom-color: var(--text); }
+.input-field::placeholder { color: var(--muted); }
+
+.sales-table { width: 100%; border-collapse: collapse; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.sales-table th, .sales-table td { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 0.75rem 1rem; text-align: left; font-weight: 400; font-size: 0.9rem; }
+.sales-table th { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); background: var(--surface); }
+.sales-table .cat-label { font-size: 0.9rem; font-weight: 500; color: var(--text); }
+.sales-table input[type="number"] { width: 100%; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--text); outline: none; padding: 0; text-align: right; -moz-appearance: textfield; }
+.sales-table input::-webkit-outer-spin-button, .sales-table input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.sales-table input::placeholder { color: var(--muted); }
+.sales-table input:focus { border-bottom: 1px solid var(--text); }
+
+.cust-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.cust-cell { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.cust-cell label { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+.cust-cell input[type="number"] { width: 100%; border: none; border-bottom: 1px solid var(--line); background: transparent; font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--text); outline: none; padding: 0.3rem 0; -moz-appearance: textfield; }
+.cust-cell input::-webkit-outer-spin-button, .cust-cell input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.cust-cell input:focus { border-bottom-color: var(--text); }
+
+.textarea-field { width: 100%; border: 1px solid var(--line-dark); background: var(--surface); padding: 1rem; font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--text); outline: none; resize: vertical; min-height: 140px; transition: border-color 0.2s; line-height: 1.6; }
+.textarea-field:focus { border-color: var(--text); }
+.textarea-field::placeholder { color: var(--muted); }
+
+.nav-row { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 2rem; border-top: 1px solid var(--line); background: var(--bg); position: sticky; bottom: 0; z-index: 50; }
+.btn { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; padding: 0.85rem 2rem; border: 1px solid var(--line-dark); background: var(--bg); color: var(--text); cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em; }
+.btn:hover { background: var(--surface); }
+.btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+.btn-primary:hover { opacity: 0.85; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-ghost { border: none; background: none; color: var(--muted); padding: 0.85rem 0; }
+.btn-ghost:hover { color: var(--text); background: none; }
+
+.sending-indicator { display: none; font-size: 0.8rem; color: var(--muted); font-style: italic; }
+.sending-indicator.show { display: block; }
+
+.thankyou-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 2rem; gap: 2.5rem; text-align: center; }
+.ty-eyebrow { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }
+.ty-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; }
+.ty-title em { font-style: italic; font-weight: 300; }
+.ty-sub { font-size: 1rem; color: var(--muted); max-width: 480px; line-height: 1.7; }
+
+.b2b-frame { background: white; padding: 20px; border: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; gap: 0.85rem; }
+.b2b-frame-logo { height: 18px; }
+.b2b-url { font-size: 0.75rem; color: var(--muted); font-style: italic; letter-spacing: 0.05em; }
+.b2b-btn { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500; padding: 1rem 3rem; background: var(--text); color: var(--bg); border: none; cursor: pointer; text-decoration: none; display: inline-block; letter-spacing: 0.05em; transition: opacity 0.2s; }
+.b2b-btn:hover { opacity: 0.85; }
+
+/* ADMIN */
+.admin-body { flex: 1; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+.admin-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+.admin-title { font-size: 1.4rem; font-weight: 400; letter-spacing: -0.01em; }
+.admin-meta { font-size: 0.8rem; color: var(--muted); }
+.export-btn { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500; padding: 0.6rem 1.25rem; background: var(--text); color: var(--bg); border: none; cursor: pointer; letter-spacing: 0.05em; transition: opacity 0.2s; }
+.export-btn:hover { opacity: 0.8; }
+.responses-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.responses-table th { text-align: left; padding: 0.6rem 0.75rem; background: var(--surface); border: 1px solid var(--line); font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); font-weight: 400; white-space: nowrap; }
+.responses-table td { padding: 0.6rem 0.75rem; border: 1px solid var(--line); vertical-align: top; line-height: 1.4; }
+.responses-table tr:nth-child(even) td { background: var(--surface); }
+.responses-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.no-data { text-align: center; padding: 4rem; color: var(--muted); font-style: italic; }
+.admin-loading { text-align: center; padding: 3rem; color: var(--muted); font-style: italic; font-size: 0.9rem; }
+
+/* SUMMARY CARDS */
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin-bottom: 2rem; }
+.summary-card { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 1rem 1.25rem; }
+.summary-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+.summary-value { font-size: 1.4rem; font-weight: 400; letter-spacing: -0.02em; }
+.summary-sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+
+/* VALIDATION */
+.error-msg { font-size: 0.78rem; color: var(--danger); margin-top: 0.4rem; display: none; }
+.error-msg.show { display: block; }
+.field-error .input-field { border-bottom-color: var(--danger); }
+.field-error .textarea-field { border-color: var(--danger); }
+
+@media (max-width: 540px) {
+  .cust-grid { grid-template-columns: 1fr; }
+  .nav-row { padding: 1.25rem 1.5rem; }
+  .survey-body { padding: 2rem 1.5rem 6rem; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <img src="logo.png" alt="LOSAN" class="header-logo">
+  <span class="header-step" id="header-step">1 / 5 — Identificación</span>
+</header>
+
+<!-- ═══ STEP 1: IDENTIFICATION ═══ -->
+<div id="step1" class="view active">
+  <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+  <div class="survey-body">
+    <div class="q-block">
+      <span class="q-label">SS27 — Previsión de ventas</span>
+      <h1 class="q-text">Cuéntanos sobre ti <em>y tu negocio.</em></h1>
+    </div>
+    <div class="q-block" id="wrap-nombre">
+      <label class="q-label" for="nombre">Nombre y apellido</label>
+      <input class="input-field" id="nombre" type="text" placeholder="Tu nombre completo" autocomplete="name">
+      <div class="error-msg" id="err-nombre">Por favor, introduce tu nombre.</div>
+    </div>
+    <div class="q-block" id="wrap-mail">
+      <label class="q-label" for="mail">Correo electrónico</label>
+      <input class="input-field" id="mail" type="email" placeholder="tu@empresa.com" autocomplete="email">
+      <div class="error-msg" id="err-mail">Por favor, introduce un email válido.</div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <span></span>
+    <button class="btn btn-primary" onclick="goStep(2)">Continuar →</button>
+  </div>
+</div>
+
+<!-- ═══ STEP 2: SALES FORECAST ═══ -->
+<div id="step2" class="view">
+  <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+  <div class="survey-body">
+    <div class="q-block">
+      <span class="q-label">Pregunta 1 de 4</span>
+      <h2 class="q-text">¿Cuál es tu <em>previsión de ventas</em> de LOSAN para SS27?</h2>
+      <p class="q-hint">Importe estimado en euros (€) por línea de producto.</p>
+    </div>
+    <table class="sales-table">
+      <thead><tr><th style="width:130px">Línea</th><th>Previsión (€)</th></tr></thead>
+      <tbody>
+        <tr><td class="cat-label">Man</td><td><input type="number" id="sf-man" placeholder="0" min="0"></td></tr>
+        <tr><td class="cat-label">Woman</td><td><input type="number" id="sf-woman" placeholder="0" min="0"></td></tr>
+        <tr><td class="cat-label">Teen</td><td><input type="number" id="sf-teen" placeholder="0" min="0"></td></tr>
+        <tr><td class="cat-label">Kids</td><td><input type="number" id="sf-kids" placeholder="0" min="0"></td></tr>
+        <tr><td class="cat-label">Baby</td><td><input type="number" id="sf-baby" placeholder="0" min="0"></td></tr>
+        <tr><td class="cat-label">Newborn</td><td><input type="number" id="sf-newborn" placeholder="0" min="0"></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" onclick="goStep(1)">← Atrás</button>
+    <button class="btn btn-primary" onclick="goStep(3)">Continuar →</button>
+  </div>
+</div>
+
+<!-- ═══ STEP 3: CUSTOMERS ═══ -->
+<div id="step3" class="view">
+  <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+  <div class="survey-body">
+    <div class="q-block">
+      <span class="q-label">Pregunta 2 de 4</span>
+      <h2 class="q-text">¿A cuántos <em>clientes</em> crees que venderás la colección SS27?</h2>
+      <p class="q-hint">Número de clientes por línea de producto.</p>
+    </div>
+    <div class="cust-grid">
+      <div class="cust-cell"><label>Man</label><input type="number" id="cc-man" placeholder="0" min="0"></div>
+      <div class="cust-cell"><label>Woman</label><input type="number" id="cc-woman" placeholder="0" min="0"></div>
+      <div class="cust-cell"><label>Teen</label><input type="number" id="cc-teen" placeholder="0" min="0"></div>
+      <div class="cust-cell"><label>Kids</label><input type="number" id="cc-kids" placeholder="0" min="0"></div>
+      <div class="cust-cell"><label>Baby</label><input type="number" id="cc-baby" placeholder="0" min="0"></div>
+      <div class="cust-cell"><label>Newborn</label><input type="number" id="cc-newborn" placeholder="0" min="0"></div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" onclick="goStep(2)">← Atrás</button>
+    <button class="btn btn-primary" onclick="goStep(4)">Continuar →</button>
+  </div>
+</div>
+
+<!-- ═══ STEP 4: NEW CUSTOMERS ═══ -->
+<div id="step4" class="view">
+  <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+  <div class="survey-body">
+    <div class="q-block">
+      <span class="q-label">Pregunta 3 de 4</span>
+      <h2 class="q-text">¿Cuántos <em>clientes nuevos</em> crees que podrás crear o reactivar para SS27?</h2>
+      <p class="q-hint">Número total por línea de producto.</p>
+    </div>
+    <div class="cust-grid">
+      <div class="cust-cell"><label>Man</label><input type="number" id="nc-man" placeholder="0" min="0"></div>
+      <div class="cust-cell"><label>Woman</label><input type="number" id="nc-woman" placeholder="0" min="0"></div>
+      <div class="cust-cell"><label>Teen</label><input type="number" id="nc-teen" placeholder="0" min="0"></div>
+      <div class="cust-cell"><label>Kids</label><input type="number" id="nc-kids" placeholder="0" min="0"></div>
+      <div class="cust-cell"><label>Baby</label><input type="number" id="nc-baby" placeholder="0" min="0"></div>
+      <div class="cust-cell"><label>Newborn</label><input type="number" id="nc-newborn" placeholder="0" min="0"></div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" onclick="goStep(3)">← Atrás</button>
+    <button class="btn btn-primary" onclick="goStep(5)">Continuar →</button>
+  </div>
+</div>
+
+<!-- ═══ STEP 5: NEEDS ═══ -->
+<div id="step5" class="view">
+  <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  <div class="survey-body">
+    <div class="q-block">
+      <span class="q-label">Pregunta 4 de 4</span>
+      <h2 class="q-text">¿Qué necesitas por parte de LOSAN para <em>alcanzar tu mejor nivel de ventas?</em></h2>
+    </div>
+    <div class="q-block" id="wrap-needs">
+      <textarea class="textarea-field" id="needs" placeholder="Escribe aquí tu respuesta..."></textarea>
+      <div class="error-msg" id="err-needs">Por favor, escribe tu respuesta.</div>
+    </div>
+    <div class="sending-indicator" id="sending-msg">Guardando respuestas...</div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" onclick="goStep(4)">← Atrás</button>
+    <button class="btn btn-primary" id="submit-btn" onclick="submitSurvey()">Enviar →</button>
+  </div>
+</div>
+
+<!-- ═══ THANK YOU ═══ -->
+<div id="thankyou" class="view">
+  <div class="progress-bar"><div class="progress-fill" style="width:100%; background:var(--success)"></div></div>
+  <div class="thankyou-body">
+    <img src="isologo.png" alt="" style="width:60px;height:60px;opacity:0.75;">
+    <div>
+      <div class="ty-eyebrow">SS27 — Gracias</div>
+    </div>
+    <h1 class="ty-title">Tu visión<br><em>nos impulsa.</em></h1>
+    <p class="ty-sub">Hemos recibido tus respuestas. Ahora accede al portal B2B de LOSAN para explorar la colección SS27.</p>
+    <div class="b2b-frame">
+      <img src="logo.png" alt="LOSAN" class="b2b-frame-logo">
+      <div id="b2b-qr"></div>
+      <p class="b2b-url">b2b.losan.com</p>
+    </div>
+    <a href="https://b2b.losan.com" class="b2b-btn" target="_blank" rel="noopener">Acceder al B2B →</a>
+  </div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div id="admin" class="view">
+  <div class="admin-body">
+    <div class="admin-header">
+      <div>
+        <h2 class="admin-title">Resultados SS27</h2>
+        <p class="admin-meta" id="admin-meta">Cargando...</p>
+      </div>
+      <button class="export-btn" onclick="exportCSV()">Exportar CSV</button>
+    </div>
+    <div id="summary-wrap"></div>
+    <div id="admin-table-wrap"><div class="admin-loading">Cargando respuestas...</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SCRIPTS ═══════════════════════════════════════════ -->
+<script>
+// ── FIREBASE CONFIG (same project as translator, different path) ──
+const firebaseConfig = {
+  apiKey: "AIzaSyAk_d6JF0NuQtd-9h8GdpK9JEtfM4qn65I",
+  authDomain: "traductorlosan.firebaseapp.com",
+  databaseURL: "https://traductorlosan-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "traductorlosan",
+  storageBucket: "traductorlosan.firebasestorage.app",
+  messagingSenderId: "883937975350",
+  appId: "1:883937975350:web:4905dde97938f1b6ca8c97"
+};
+
+// Survey data goes to /surveys/ss27/ — completely separate from /sessions/
+const SURVEY_PATH = 'surveys/ss27';
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ── NAV ──
+const STEP_LABELS = {
+  1: 'Identificación',
+  2: 'Previsión de ventas',
+  3: 'Clientes SS27',
+  4: 'Clientes nuevos',
+  5: 'Necesidades',
+};
+
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goStep(n) {
+  const current = parseInt(document.querySelector('.view.active')?.id?.replace('step','')) || 1;
+  if (n > current && !validateStep(current)) return;
+  const label = STEP_LABELS[n];
+  document.getElementById('header-step').textContent = label ? `${n} / 5 — ${label}` : '';
+  showView('step' + n);
+}
+
+// ── VALIDATION ──
+function validateStep(step) {
+  if (step === 1) {
+    const nombre = v('nombre');
+    const mail = v('mail');
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    let ok = true;
+    if (!nombre) { showErr('nombre', 'Por favor, introduce tu nombre.'); ok = false; } else hideErr('nombre');
+    if (!emailRe.test(mail)) { showErr('mail', !mail ? 'Por favor, introduce un email.' : 'Email no válido.'); ok = false; } else hideErr('mail');
+    return ok;
+  }
+  if (step === 5) {
+    const needs = v('needs');
+    if (!needs) { showErr('needs', 'Por favor, escribe tu respuesta.'); return false; }
+    hideErr('needs');
+    return true;
+  }
+  return true;
+}
+
+function v(id) { return (document.getElementById(id)?.value || '').trim(); }
+function num(id) { const val = document.getElementById(id)?.value; return val ? parseInt(val) || 0 : 0; }
+
+function showErr(field, msg) {
+  const err = document.getElementById('err-' + field);
+  const wrap = document.getElementById('wrap-' + field);
+  if (err) { err.textContent = msg; err.classList.add('show'); }
+  if (wrap) wrap.classList.add('field-error');
+}
+function hideErr(field) {
+  document.getElementById('err-' + field)?.classList.remove('show');
+  document.getElementById('wrap-' + field)?.classList.remove('field-error');
+}
+
+// ── COLLECT ──
+const CATS = ['man','woman','teen','kids','baby','newborn'];
+
+function getBlock(prefix) {
+  const data = {};
+  CATS.forEach(c => { data[c] = num(`${prefix}-${c}`); });
+  return data;
+}
+
+// ── SUBMIT ──
+async function submitSurvey() {
+  if (!validateStep(5)) return;
+
+  const btn = document.getElementById('submit-btn');
+  const sending = document.getElementById('sending-msg');
+  btn.disabled = true;
+  sending.classList.add('show');
+
+  const response = {
+    timestamp: firebase.database.ServerValue.TIMESTAMP,
+    nombre: v('nombre'),
+    mail: v('mail'),
+    prevision_ventas: getBlock('sf'),
+    clientes_ss27: getBlock('cc'),
+    clientes_nuevos: getBlock('nc'),
+    necesidades: v('needs'),
+  };
+
+  try {
+    await db.ref(SURVEY_PATH).push(response);
+  } catch(err) {
+    console.error('Firebase write error:', err);
+    // Still proceed to thank you — don't block the user
+  }
+
+  document.getElementById('header-step').textContent = 'Completado';
+  showView('thankyou');
+
+  setTimeout(() => {
+    document.getElementById('b2b-qr').innerHTML = '';
+    new QRCode(document.getElementById('b2b-qr'), {
+      text: 'https://b2b.losan.com',
+      width: 200, height: 200,
+      colorDark: '#0a0a0a', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }, 400);
+}
+
+// ── ADMIN ──
+async function loadAdmin() {
+  showView('admin');
+  document.getElementById('header-step').textContent = 'Panel de resultados';
+
+  db.ref(SURVEY_PATH).on('value', snap => {
+    const raw = snap.val();
+    const rows = raw ? Object.entries(raw).map(([k, v]) => ({ _key: k, ...v })) : [];
+
+    // Sort newest first
+    rows.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+    document.getElementById('admin-meta').textContent =
+      rows.length === 0 ? 'Sin respuestas todavía.' :
+      `${rows.length} respuesta${rows.length !== 1 ? 's' : ''} recibida${rows.length !== 1 ? 's' : ''}.`;
+
+    renderSummary(rows);
+    renderTable(rows);
+  });
+}
+
+function renderSummary(rows) {
+  if (!rows.length) { document.getElementById('summary-wrap').innerHTML = ''; return; }
+
+  const totalVentas = CATS.reduce((acc, c) => {
+    return acc + rows.reduce((s, r) => s + (r.prevision_ventas?.[c] || 0), 0);
+  }, 0);
+
+  const totalClientes = CATS.reduce((acc, c) => {
+    return acc + rows.reduce((s, r) => s + (r.clientes_ss27?.[c] || 0), 0);
+  }, 0);
+
+  const totalNuevos = CATS.reduce((acc, c) => {
+    return acc + rows.reduce((s, r) => s + (r.clientes_nuevos?.[c] || 0), 0);
+  }, 0);
+
+  document.getElementById('summary-wrap').innerHTML = `
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">Respuestas</div>
+        <div class="summary-value">${rows.length}</div>
+        <div class="summary-sub">agentes</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Ventas totales SS27</div>
+        <div class="summary-value">${totalVentas.toLocaleString('es-ES')}€</div>
+        <div class="summary-sub">previsión agregada</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Clientes totales</div>
+        <div class="summary-value">${totalClientes.toLocaleString('es-ES')}</div>
+        <div class="summary-sub">cartera SS27</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Clientes nuevos</div>
+        <div class="summary-value">${totalNuevos.toLocaleString('es-ES')}</div>
+        <div class="summary-sub">captación/reactivación</div>
+      </div>
+    </div>`;
+}
+
+function renderTable(rows) {
+  if (!rows.length) {
+    document.getElementById('admin-table-wrap').innerHTML = '<div class="no-data">Las respuestas aparecerán aquí en tiempo real.</div>';
+    return;
+  }
+
+  const sfCols = CATS.map(c => `<th>Vtas ${c}</th>`).join('');
+  const ccCols = CATS.map(c => `<th>Cli ${c}</th>`).join('');
+  const ncCols = CATS.map(c => `<th>Nvo ${c}</th>`).join('');
+
+  const trs = rows.map(r => {
+    const sf = CATS.map(c => `<td class="num">${(r.prevision_ventas?.[c]||0).toLocaleString('es-ES')}€</td>`).join('');
+    const cc = CATS.map(c => `<td class="num">${r.clientes_ss27?.[c]||0}</td>`).join('');
+    const nc = CATS.map(c => `<td class="num">${r.clientes_nuevos?.[c]||0}</td>`).join('');
+    const dt = r.timestamp ? new Date(r.timestamp).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'}) : '—';
+    const needs = esc(r.necesidades || '');
+    return `<tr>
+      <td style="white-space:nowrap">${dt}</td>
+      <td><strong>${esc(r.nombre)}</strong></td>
+      <td style="color:var(--muted)">${esc(r.mail)}</td>
+      ${sf}${cc}${nc}
+      <td style="max-width:220px;font-size:0.75rem;line-height:1.5">${needs}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('admin-table-wrap').innerHTML = `
+    <div style="overflow-x:auto;margin-top:1rem">
+      <table class="responses-table">
+        <thead><tr>
+          <th>Fecha</th><th>Nombre</th><th>Email</th>
+          ${sfCols}${ccCols}${ncCols}
+          <th>Necesidades</th>
+        </tr></thead>
+        <tbody>${trs}</tbody>
+      </table>
+    </div>`;
+}
+
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+// ── CSV EXPORT ──
+async function exportCSV() {
+  const snap = await db.ref(SURVEY_PATH).get();
+  const raw = snap.val();
+  if (!raw) { alert('No hay respuestas para exportar.'); return; }
+
+  const rows = Object.entries(raw).map(([k, v]) => ({ _key: k, ...v }));
+  rows.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+  const sfH = CATS.map(c => `Ventas_${c}`).join(';');
+  const ccH = CATS.map(c => `Clientes_${c}`).join(';');
+  const ncH = CATS.map(c => `NuevosClientes_${c}`).join(';');
+  const header = `Fecha;Nombre;Email;${sfH};${ccH};${ncH};Necesidades`;
+
+  const lines = rows.map(r => {
+    const dt = r.timestamp ? new Date(r.timestamp).toLocaleString('es-ES') : '';
+    const sf = CATS.map(c => r.prevision_ventas?.[c]||0).join(';');
+    const cc = CATS.map(c => r.clientes_ss27?.[c]||0).join(';');
+    const nc = CATS.map(c => r.clientes_nuevos?.[c]||0).join(';');
+    const needs = (r.necesidades||'').replace(/[\r\n;]/g,' ');
+    return `${dt};${r.nombre};${r.mail};${sf};${cc};${nc};${needs}`;
+  });
+
+  const csv = '\uFEFF' + header + '\n' + lines.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `LOSAN_SS27_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('admin') === 'losan27') {
+    loadAdmin();
+  }
+});
+</script>
+</body>
+</html>
