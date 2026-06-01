@@ -10,155 +10,116 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #fff;
-  --surface: #fafafa;
-  --text: #0a0a0a;
-  --muted: #8a8a8a;
-  --line: #e8e8e8;
-  --line-dark: #d0d0d0;
-  --danger: #c8102e;
-  --success: #1a7f5a;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
-}
+:root{--bg:#fff;--surface:#fafafa;--text:#0a0a0a;--muted:#8a8a8a;--line:#e8e8e8;--line-dark:#d0d0d0;--danger:#c8102e;--success:#1a7f5a;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh;}
 
-.header {
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  z-index: 100;
-}
-.header-logo { height: 28px; width: auto; }
-.header-step { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.header{padding:1.5rem 2rem;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:100;}
+.header-logo{height:28px;width:auto;}
+.header-right{display:flex;align-items:center;gap:1.5rem;}
+.header-step{font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
+.lang-switcher{display:flex;gap:0.35rem;}
+.lang-btn{font-family:'DM Sans',sans-serif;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;border:1px solid var(--line-dark);background:transparent;color:var(--muted);padding:0.3rem 0.6rem;cursor:pointer;transition:all 0.2s;}
+.lang-btn:hover{background:var(--surface);color:var(--text);}
+.lang-btn.active{background:var(--text);color:var(--bg);border-color:var(--text);}
 
-.view { display: none; min-height: calc(100vh - 70px); }
-.view.active { display: flex; flex-direction: column; }
+.view{display:none;min-height:calc(100vh - 70px);}
+.view.active{display:flex;flex-direction:column;}
 
-.progress-bar { height: 2px; background: var(--line); width: 100%; }
-.progress-fill { height: 100%; background: var(--text); transition: width 0.5s ease; }
+.progress-bar{height:2px;background:var(--line);width:100%;}
+.progress-fill{height:100%;background:var(--text);transition:width 0.5s ease;}
 
-.survey-body {
-  flex: 1;
-  max-width: 680px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 3rem 2rem 6rem;
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-}
+.survey-body{flex:1;max-width:680px;width:100%;margin:0 auto;padding:3rem 2rem 6rem;display:flex;flex-direction:column;gap:3rem;}
 
-.q-block { display: flex; flex-direction: column; gap: 1.25rem; }
-.q-label { font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); }
-.q-text { font-size: 1.3rem; font-weight: 400; line-height: 1.4; letter-spacing: -0.01em; }
-.q-text em { font-style: italic; font-weight: 300; }
-.q-hint { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+.q-block{display:flex;flex-direction:column;gap:1.25rem;}
+.q-label{font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);}
+.q-text{font-size:1.3rem;font-weight:400;line-height:1.4;letter-spacing:-0.01em;}
+.q-text em{font-style:italic;font-weight:300;}
+.q-hint{font-size:0.85rem;color:var(--muted);line-height:1.5;}
 
-.input-field {
-  width: 100%;
-  border: none;
-  border-bottom: 1px solid var(--line-dark);
-  background: transparent;
-  padding: 0.75rem 0;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 1rem;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s;
-}
-.input-field:focus { border-bottom-color: var(--text); }
-.input-field::placeholder { color: var(--muted); }
+.input-field{width:100%;border:none;border-bottom:1px solid var(--line-dark);background:transparent;padding:0.75rem 0;font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--text);outline:none;transition:border-color 0.2s;}
+.input-field:focus{border-bottom-color:var(--text);}
+.input-field::placeholder{color:var(--muted);}
 
-.sales-table { width: 100%; border-collapse: collapse; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
-.sales-table th, .sales-table td { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 0.75rem 1rem; text-align: left; font-weight: 400; font-size: 0.9rem; }
-.sales-table th { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); background: var(--surface); }
-.sales-table .cat-label { font-size: 0.9rem; font-weight: 500; color: var(--text); }
-.sales-table input[type="number"] { width: 100%; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--text); outline: none; padding: 0; text-align: right; -moz-appearance: textfield; }
-.sales-table input::-webkit-outer-spin-button, .sales-table input::-webkit-inner-spin-button { -webkit-appearance: none; }
-.sales-table input::placeholder { color: var(--muted); }
-.sales-table input:focus { border-bottom: 1px solid var(--text); }
+.sales-table{width:100%;border-collapse:collapse;border-top:1px solid var(--line);border-left:1px solid var(--line);}
+.sales-table th,.sales-table td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0.75rem 1rem;text-align:left;font-weight:400;font-size:0.9rem;}
+.sales-table th{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);background:var(--surface);}
+.sales-table .cat-label{font-size:0.9rem;font-weight:500;}
+.sales-table input[type="number"]{width:100%;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:0.95rem;color:var(--text);outline:none;padding:0;text-align:right;-moz-appearance:textfield;}
+.sales-table input::-webkit-outer-spin-button,.sales-table input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.sales-table input::placeholder{color:var(--muted);}
+.sales-table input:focus{border-bottom:1px solid var(--text);}
 
-.cust-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
-.cust-cell { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
-.cust-cell label { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
-.cust-cell input[type="number"] { width: 100%; border: none; border-bottom: 1px solid var(--line); background: transparent; font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--text); outline: none; padding: 0.3rem 0; -moz-appearance: textfield; }
-.cust-cell input::-webkit-outer-spin-button, .cust-cell input::-webkit-inner-spin-button { -webkit-appearance: none; }
-.cust-cell input:focus { border-bottom-color: var(--text); }
+.cust-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line);border-left:1px solid var(--line);}
+.cust-cell{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0.75rem 1rem;display:flex;flex-direction:column;gap:0.4rem;}
+.cust-cell label{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);}
+.cust-cell input[type="number"]{width:100%;border:none;border-bottom:1px solid var(--line);background:transparent;font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--text);outline:none;padding:0.3rem 0;-moz-appearance:textfield;}
+.cust-cell input::-webkit-outer-spin-button,.cust-cell input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.cust-cell input:focus{border-bottom-color:var(--text);}
 
-.textarea-field { width: 100%; border: 1px solid var(--line-dark); background: var(--surface); padding: 1rem; font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--text); outline: none; resize: vertical; min-height: 140px; transition: border-color 0.2s; line-height: 1.6; }
-.textarea-field:focus { border-color: var(--text); }
-.textarea-field::placeholder { color: var(--muted); }
+.textarea-field{width:100%;border:1px solid var(--line-dark);background:var(--surface);padding:1rem;font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--text);outline:none;resize:vertical;min-height:140px;transition:border-color 0.2s;line-height:1.6;}
+.textarea-field:focus{border-color:var(--text);}
+.textarea-field::placeholder{color:var(--muted);}
 
-.nav-row { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 2rem; border-top: 1px solid var(--line); background: var(--bg); position: sticky; bottom: 0; z-index: 50; }
-.btn { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; padding: 0.85rem 2rem; border: 1px solid var(--line-dark); background: var(--bg); color: var(--text); cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em; }
-.btn:hover { background: var(--surface); }
-.btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
-.btn-primary:hover { opacity: 0.85; }
-.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-ghost { border: none; background: none; color: var(--muted); padding: 0.85rem 0; }
-.btn-ghost:hover { color: var(--text); background: none; }
+.nav-row{display:flex;align-items:center;justify-content:space-between;padding:1.5rem 2rem;border-top:1px solid var(--line);background:var(--bg);position:sticky;bottom:0;z-index:50;}
+.btn{font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;padding:0.85rem 2rem;border:1px solid var(--line-dark);background:var(--bg);color:var(--text);cursor:pointer;transition:all 0.2s;letter-spacing:0.03em;}
+.btn:hover{background:var(--surface);}
+.btn-primary{background:var(--text);color:var(--bg);border-color:var(--text);}
+.btn-primary:hover{opacity:0.85;}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-ghost{border:none;background:none;color:var(--muted);padding:0.85rem 0;}
+.btn-ghost:hover{color:var(--text);background:none;}
 
-.sending-indicator { display: none; font-size: 0.8rem; color: var(--muted); font-style: italic; }
-.sending-indicator.show { display: block; }
+.sending-indicator{display:none;font-size:0.8rem;color:var(--muted);font-style:italic;}
+.sending-indicator.show{display:block;}
 
-.thankyou-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 2rem; gap: 2.5rem; text-align: center; }
-.ty-eyebrow { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }
-.ty-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 400; line-height: 1.1; letter-spacing: -0.02em; }
-.ty-title em { font-style: italic; font-weight: 300; }
-.ty-sub { font-size: 1rem; color: var(--muted); max-width: 480px; line-height: 1.7; }
+/* THANK YOU */
+.thankyou-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;gap:2.5rem;text-align:center;}
+.ty-eyebrow{font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);}
+.ty-title{font-size:clamp(2rem,5vw,3.5rem);font-weight:400;line-height:1.1;letter-spacing:-0.02em;}
+.ty-title em{font-style:italic;font-weight:300;}
+.ty-sub{font-size:1rem;color:var(--muted);max-width:480px;line-height:1.7;}
+.b2b-frame{background:white;padding:20px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:0.85rem;}
+.b2b-frame-logo{height:18px;}
+.b2b-url{font-size:0.75rem;color:var(--muted);font-style:italic;letter-spacing:0.05em;}
+.b2b-btn{font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;padding:1rem 3rem;background:var(--text);color:var(--bg);border:none;cursor:pointer;text-decoration:none;display:inline-block;letter-spacing:0.05em;transition:opacity 0.2s;}
+.b2b-btn:hover{opacity:0.85;}
 
-.b2b-frame { background: white; padding: 20px; border: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; gap: 0.85rem; }
-.b2b-frame-logo { height: 18px; }
-.b2b-url { font-size: 0.75rem; color: var(--muted); font-style: italic; letter-spacing: 0.05em; }
-.b2b-btn { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500; padding: 1rem 3rem; background: var(--text); color: var(--bg); border: none; cursor: pointer; text-decoration: none; display: inline-block; letter-spacing: 0.05em; transition: opacity 0.2s; }
-.b2b-btn:hover { opacity: 0.85; }
+/* ISOLOGO PULSE */
+.isologo-pulse{animation:logoPulse 2.4s ease-in-out infinite;}
+@keyframes logoPulse{0%,100%{opacity:1;}50%{opacity:0.25;}}
 
 /* ADMIN */
-.admin-body { flex: 1; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
-.admin-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
-.admin-title { font-size: 1.4rem; font-weight: 400; letter-spacing: -0.01em; }
-.admin-meta { font-size: 0.8rem; color: var(--muted); }
-.export-btn { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500; padding: 0.6rem 1.25rem; background: var(--text); color: var(--bg); border: none; cursor: pointer; letter-spacing: 0.05em; transition: opacity 0.2s; }
-.export-btn:hover { opacity: 0.8; }
-.responses-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
-.responses-table th { text-align: left; padding: 0.6rem 0.75rem; background: var(--surface); border: 1px solid var(--line); font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); font-weight: 400; white-space: nowrap; }
-.responses-table td { padding: 0.6rem 0.75rem; border: 1px solid var(--line); vertical-align: top; line-height: 1.4; }
-.responses-table tr:nth-child(even) td { background: var(--surface); }
-.responses-table .num { text-align: right; font-variant-numeric: tabular-nums; }
-.no-data { text-align: center; padding: 4rem; color: var(--muted); font-style: italic; }
-.admin-loading { text-align: center; padding: 3rem; color: var(--muted); font-style: italic; font-size: 0.9rem; }
+.admin-body{flex:1;padding:2rem;max-width:1200px;margin:0 auto;width:100%;}
+.admin-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;}
+.admin-title{font-size:1.4rem;font-weight:400;letter-spacing:-0.01em;}
+.admin-meta{font-size:0.8rem;color:var(--muted);}
+.export-btn{font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;padding:0.6rem 1.25rem;background:var(--text);color:var(--bg);border:none;cursor:pointer;letter-spacing:0.05em;}
+.export-btn:hover{opacity:0.8;}
+.responses-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+.responses-table th{text-align:left;padding:0.6rem 0.75rem;background:var(--surface);border:1px solid var(--line);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);font-weight:400;white-space:nowrap;}
+.responses-table td{padding:0.6rem 0.75rem;border:1px solid var(--line);vertical-align:top;line-height:1.4;}
+.responses-table tr:nth-child(even) td{background:var(--surface);}
+.responses-table .num{text-align:right;font-variant-numeric:tabular-nums;}
+.no-data{text-align:center;padding:4rem;color:var(--muted);font-style:italic;}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;border-top:1px solid var(--line);border-left:1px solid var(--line);margin-bottom:2rem;}
+.summary-card{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:1rem 1.25rem;}
+.summary-label{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;}
+.summary-value{font-size:1.4rem;font-weight:400;letter-spacing:-0.02em;}
+.summary-sub{font-size:0.7rem;color:var(--muted);margin-top:0.2rem;}
 
-/* SUMMARY CARDS */
-.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); margin-bottom: 2rem; }
-.summary-card { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 1rem 1.25rem; }
-.summary-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
-.summary-value { font-size: 1.4rem; font-weight: 400; letter-spacing: -0.02em; }
-.summary-sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+.error-msg{font-size:0.78rem;color:var(--danger);margin-top:0.4rem;display:none;}
+.error-msg.show{display:block;}
+.field-error .input-field{border-bottom-color:var(--danger);}
+.field-error .textarea-field{border-color:var(--danger);}
 
-/* VALIDATION */
-.error-msg { font-size: 0.78rem; color: var(--danger); margin-top: 0.4rem; display: none; }
-.error-msg.show { display: block; }
-.field-error .input-field { border-bottom-color: var(--danger); }
-.field-error .textarea-field { border-color: var(--danger); }
-
-@media (max-width: 540px) {
-  .cust-grid { grid-template-columns: 1fr; }
-  .nav-row { padding: 1.25rem 1.5rem; }
-  .survey-body { padding: 2rem 1.5rem 6rem; }
-  .summary-grid { grid-template-columns: 1fr 1fr; }
+@media(max-width:540px){
+  .cust-grid{grid-template-columns:1fr;}
+  .nav-row{padding:1.25rem 1.5rem;}
+  .survey-body{padding:2rem 1.5rem 6rem;}
+  .header{padding:1.25rem 1.5rem;}
+  .lang-btn{padding:0.25rem 0.5rem;}
 }
 </style>
 </head>
@@ -166,45 +127,59 @@ body {
 
 <header class="header">
   <img src="logo.png" alt="LOSAN" class="header-logo">
-  <span class="header-step" id="header-step">1 / 5 — Identificación</span>
+  <div class="header-right">
+    <div class="lang-switcher" id="lang-switcher">
+      <button class="lang-btn active" data-lang="es" onclick="setLang('es')">ES</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="fr" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" data-lang="de" onclick="setLang('de')">DE</button>
+      <button class="lang-btn" data-lang="pt" onclick="setLang('pt')">PT</button>
+      <button class="lang-btn" data-lang="it" onclick="setLang('it')">IT</button>
+      <button class="lang-btn" data-lang="ca" onclick="setLang('ca')">CA</button>
+    </div>
+    <span class="header-step" id="header-step"></span>
+  </div>
 </header>
 
-<!-- ═══ STEP 1: IDENTIFICATION ═══ -->
+<!-- STEP 1 -->
 <div id="step1" class="view active">
   <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
   <div class="survey-body">
     <div class="q-block">
-      <span class="q-label">SS27 — Previsión de ventas</span>
-      <h1 class="q-text">Cuéntanos sobre ti <em>y tu negocio.</em></h1>
+      <span class="q-label" data-i18n="eyebrow_survey">SS27 — Previsión de ventas</span>
+      <h1 class="q-text" data-i18n-html="s1_title">Cuéntanos sobre ti <em>y tu negocio.</em></h1>
     </div>
     <div class="q-block" id="wrap-nombre">
-      <label class="q-label" for="nombre">Nombre y apellido</label>
-      <input class="input-field" id="nombre" type="text" placeholder="Tu nombre completo" autocomplete="name">
-      <div class="error-msg" id="err-nombre">Por favor, introduce tu nombre.</div>
+      <label class="q-label" data-i18n="label_name">Nombre y apellido</label>
+      <input class="input-field" id="nombre" type="text" autocomplete="name" data-i18n-placeholder="ph_name">
+      <div class="error-msg" id="err-nombre" data-i18n="err_name">Por favor, introduce tu nombre.</div>
     </div>
     <div class="q-block" id="wrap-mail">
-      <label class="q-label" for="mail">Correo electrónico</label>
-      <input class="input-field" id="mail" type="email" placeholder="tu@empresa.com" autocomplete="email">
-      <div class="error-msg" id="err-mail">Por favor, introduce un email válido.</div>
+      <label class="q-label" data-i18n="label_email">Correo electrónico</label>
+      <input class="input-field" id="mail" type="email" autocomplete="email" data-i18n-placeholder="ph_email">
+      <div class="error-msg" id="err-mail" data-i18n="err_email">Por favor, introduce un email válido.</div>
     </div>
   </div>
   <div class="nav-row">
     <span></span>
-    <button class="btn btn-primary" onclick="goStep(2)">Continuar →</button>
+    <button class="btn btn-primary" onclick="goStep(2)" data-i18n="btn_continue">Continuar →</button>
   </div>
 </div>
 
-<!-- ═══ STEP 2: SALES FORECAST ═══ -->
+<!-- STEP 2 -->
 <div id="step2" class="view">
   <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
   <div class="survey-body">
     <div class="q-block">
-      <span class="q-label">Pregunta 1 de 4</span>
-      <h2 class="q-text">¿Cuál es tu <em>previsión de ventas</em> de LOSAN para SS27?</h2>
-      <p class="q-hint">Importe estimado en euros (€) por línea de producto.</p>
+      <span class="q-label" data-i18n="q_label_1">Pregunta 1 de 4</span>
+      <h2 class="q-text" data-i18n-html="s2_title">¿Cuál es tu <em>previsión de ventas</em> de LOSAN para SS27?</h2>
+      <p class="q-hint" data-i18n="s2_hint">Importe estimado en euros (€) por línea de producto.</p>
     </div>
     <table class="sales-table">
-      <thead><tr><th style="width:130px">Línea</th><th>Previsión (€)</th></tr></thead>
+      <thead><tr>
+        <th style="width:130px" data-i18n="th_line">Línea</th>
+        <th data-i18n="th_forecast">Previsión (€)</th>
+      </tr></thead>
       <tbody>
         <tr><td class="cat-label">Man</td><td><input type="number" id="sf-man" placeholder="0" min="0"></td></tr>
         <tr><td class="cat-label">Woman</td><td><input type="number" id="sf-woman" placeholder="0" min="0"></td></tr>
@@ -216,19 +191,19 @@ body {
     </table>
   </div>
   <div class="nav-row">
-    <button class="btn btn-ghost" onclick="goStep(1)">← Atrás</button>
-    <button class="btn btn-primary" onclick="goStep(3)">Continuar →</button>
+    <button class="btn btn-ghost" onclick="goStep(1)" data-i18n="btn_back">← Atrás</button>
+    <button class="btn btn-primary" onclick="goStep(3)" data-i18n="btn_continue">Continuar →</button>
   </div>
 </div>
 
-<!-- ═══ STEP 3: CUSTOMERS ═══ -->
+<!-- STEP 3 -->
 <div id="step3" class="view">
   <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
   <div class="survey-body">
     <div class="q-block">
-      <span class="q-label">Pregunta 2 de 4</span>
-      <h2 class="q-text">¿A cuántos <em>clientes</em> crees que venderás la colección SS27?</h2>
-      <p class="q-hint">Número de clientes por línea de producto.</p>
+      <span class="q-label" data-i18n="q_label_2">Pregunta 2 de 4</span>
+      <h2 class="q-text" data-i18n-html="s3_title">¿A cuántos <em>clientes</em> crees que venderás la colección SS27?</h2>
+      <p class="q-hint" data-i18n="s3_hint">Número de clientes por línea de producto.</p>
     </div>
     <div class="cust-grid">
       <div class="cust-cell"><label>Man</label><input type="number" id="cc-man" placeholder="0" min="0"></div>
@@ -240,19 +215,19 @@ body {
     </div>
   </div>
   <div class="nav-row">
-    <button class="btn btn-ghost" onclick="goStep(2)">← Atrás</button>
-    <button class="btn btn-primary" onclick="goStep(4)">Continuar →</button>
+    <button class="btn btn-ghost" onclick="goStep(2)" data-i18n="btn_back">← Atrás</button>
+    <button class="btn btn-primary" onclick="goStep(4)" data-i18n="btn_continue">Continuar →</button>
   </div>
 </div>
 
-<!-- ═══ STEP 4: NEW CUSTOMERS ═══ -->
+<!-- STEP 4 -->
 <div id="step4" class="view">
   <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
   <div class="survey-body">
     <div class="q-block">
-      <span class="q-label">Pregunta 3 de 4</span>
-      <h2 class="q-text">¿Cuántos <em>clientes nuevos</em> crees que podrás crear o reactivar para SS27?</h2>
-      <p class="q-hint">Número total por línea de producto.</p>
+      <span class="q-label" data-i18n="q_label_3">Pregunta 3 de 4</span>
+      <h2 class="q-text" data-i18n-html="s4_title">¿Cuántos <em>clientes nuevos</em> crees que podrás crear o reactivar para SS27?</h2>
+      <p class="q-hint" data-i18n="s4_hint">Número total por línea de producto.</p>
     </div>
     <div class="cust-grid">
       <div class="cust-cell"><label>Man</label><input type="number" id="nc-man" placeholder="0" min="0"></div>
@@ -264,51 +239,49 @@ body {
     </div>
   </div>
   <div class="nav-row">
-    <button class="btn btn-ghost" onclick="goStep(3)">← Atrás</button>
-    <button class="btn btn-primary" onclick="goStep(5)">Continuar →</button>
+    <button class="btn btn-ghost" onclick="goStep(3)" data-i18n="btn_back">← Atrás</button>
+    <button class="btn btn-primary" onclick="goStep(5)" data-i18n="btn_continue">Continuar →</button>
   </div>
 </div>
 
-<!-- ═══ STEP 5: NEEDS ═══ -->
+<!-- STEP 5 -->
 <div id="step5" class="view">
   <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
   <div class="survey-body">
     <div class="q-block">
-      <span class="q-label">Pregunta 4 de 4</span>
-      <h2 class="q-text">¿Qué necesitas por parte de LOSAN para <em>alcanzar tu mejor nivel de ventas?</em></h2>
+      <span class="q-label" data-i18n="q_label_4">Pregunta 4 de 4</span>
+      <h2 class="q-text" data-i18n-html="s5_title">¿Qué necesitas por parte de LOSAN para <em>alcanzar tu mejor nivel de ventas?</em></h2>
     </div>
     <div class="q-block" id="wrap-needs">
-      <textarea class="textarea-field" id="needs" placeholder="Escribe aquí tu respuesta..."></textarea>
-      <div class="error-msg" id="err-needs">Por favor, escribe tu respuesta.</div>
+      <textarea class="textarea-field" id="needs" data-i18n-placeholder="ph_needs"></textarea>
+      <div class="error-msg" id="err-needs" data-i18n="err_needs">Por favor, escribe tu respuesta.</div>
     </div>
-    <div class="sending-indicator" id="sending-msg">Guardando respuestas...</div>
+    <div class="sending-indicator" id="sending-msg" data-i18n="sending">Guardando respuestas...</div>
   </div>
   <div class="nav-row">
-    <button class="btn btn-ghost" onclick="goStep(4)">← Atrás</button>
-    <button class="btn btn-primary" id="submit-btn" onclick="submitSurvey()">Enviar →</button>
+    <button class="btn btn-ghost" onclick="goStep(4)" data-i18n="btn_back">← Atrás</button>
+    <button class="btn btn-primary" id="submit-btn" onclick="submitSurvey()" data-i18n="btn_send">Enviar →</button>
   </div>
 </div>
 
-<!-- ═══ THANK YOU ═══ -->
+<!-- THANK YOU -->
 <div id="thankyou" class="view">
-  <div class="progress-bar"><div class="progress-fill" style="width:100%; background:var(--success)"></div></div>
+  <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--success)"></div></div>
   <div class="thankyou-body">
-    <img src="isologo.png" alt="" style="width:60px;height:60px;opacity:0.75;">
-    <div>
-      <div class="ty-eyebrow">SS27 — Gracias</div>
-    </div>
-    <h1 class="ty-title">Tu visión<br><em>nos impulsa.</em></h1>
-    <p class="ty-sub">Hemos recibido tus respuestas. Ahora accede al portal B2B de LOSAN para explorar la colección SS27.</p>
+    <img src="isologo.png" alt="" class="isologo-pulse" style="width:60px;height:60px;">
+    <div class="ty-eyebrow" data-i18n="ty_eyebrow">SS27 — Gracias</div>
+    <h1 class="ty-title" data-i18n-html="ty_title">Tu visión<br><em>nos impulsa.</em></h1>
+    <p class="ty-sub" data-i18n="ty_sub">Hemos recibido tus respuestas. Ahora accede al portal B2B de LOSAN para explorar la colección SS27.</p>
     <div class="b2b-frame">
       <img src="logo.png" alt="LOSAN" class="b2b-frame-logo">
       <div id="b2b-qr"></div>
       <p class="b2b-url">b2b.losan.com</p>
     </div>
-    <a href="https://b2b.losan.com" class="b2b-btn" target="_blank" rel="noopener">Acceder al B2B →</a>
+    <a href="https://b2b.losan.com" class="b2b-btn" target="_blank" rel="noopener" data-i18n="ty_btn">Acceder al B2B →</a>
   </div>
 </div>
 
-<!-- ═══ ADMIN ═══ -->
+<!-- ADMIN -->
 <div id="admin" class="view">
   <div class="admin-body">
     <div class="admin-header">
@@ -319,13 +292,202 @@ body {
       <button class="export-btn" onclick="exportCSV()">Exportar CSV</button>
     </div>
     <div id="summary-wrap"></div>
-    <div id="admin-table-wrap"><div class="admin-loading">Cargando respuestas...</div></div>
+    <div id="admin-table-wrap"><div class="no-data" style="font-style:italic;color:var(--muted)">Cargando...</div></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════ SCRIPTS ═══════════════════════════════════════════ -->
 <script>
-// ── FIREBASE CONFIG (same project as translator, different path) ──
+// ═══════════════════════════════════
+// i18n
+// ═══════════════════════════════════
+const LANGS = {
+  es:{
+    eyebrow_survey:'SS27 — Previsión de ventas',
+    s1_title:'Cuéntanos sobre ti <em>y tu negocio.</em>',
+    label_name:'Nombre y apellido',ph_name:'Tu nombre completo',err_name:'Por favor, introduce tu nombre.',
+    label_email:'Correo electrónico',ph_email:'tu@empresa.com',err_email:'Por favor, introduce un email válido.',
+    btn_continue:'Continuar →',btn_back:'← Atrás',btn_send:'Enviar →',
+    q_label_1:'Pregunta 1 de 4',q_label_2:'Pregunta 2 de 4',q_label_3:'Pregunta 3 de 4',q_label_4:'Pregunta 4 de 4',
+    s2_title:'¿Cuál es tu <em>previsión de ventas</em> de LOSAN para SS27?',
+    s2_hint:'Importe estimado en euros (€) por línea de producto.',
+    th_line:'Línea',th_forecast:'Previsión (€)',
+    s3_title:'¿A cuántos <em>clientes</em> crees que venderás la colección SS27?',
+    s3_hint:'Número de clientes por línea de producto.',
+    s4_title:'¿Cuántos <em>clientes nuevos</em> crees que podrás crear o reactivar para SS27?',
+    s4_hint:'Número total por línea de producto.',
+    s5_title:'¿Qué necesitas por parte de LOSAN para <em>alcanzar tu mejor nivel de ventas?</em>',
+    ph_needs:'Escribe aquí tu respuesta...',err_needs:'Por favor, escribe tu respuesta.',
+    sending:'Guardando respuestas...',
+    ty_eyebrow:'SS27 — Gracias',ty_title:'Tu visión<br><em>nos impulsa.</em>',
+    ty_sub:'Hemos recibido tus respuestas. Ahora accede al portal B2B de LOSAN para explorar la colección SS27.',
+    ty_btn:'Acceder al B2B →',
+    step_labels:['Identificación','Previsión de ventas','Clientes SS27','Clientes nuevos','Necesidades'],
+  },
+  en:{
+    eyebrow_survey:'SS27 — Sales forecast',
+    s1_title:'Tell us about you <em>and your business.</em>',
+    label_name:'Full name',ph_name:'Your full name',err_name:'Please enter your name.',
+    label_email:'Email address',ph_email:'you@company.com',err_email:'Please enter a valid email.',
+    btn_continue:'Continue →',btn_back:'← Back',btn_send:'Submit →',
+    q_label_1:'Question 1 of 4',q_label_2:'Question 2 of 4',q_label_3:'Question 3 of 4',q_label_4:'Question 4 of 4',
+    s2_title:'What is your <em>sales forecast</em> for LOSAN SS27?',
+    s2_hint:'Estimated amount in euros (€) per product line.',
+    th_line:'Line',th_forecast:'Forecast (€)',
+    s3_title:'How many <em>customers</em> do you expect to sell the SS27 collection to?',
+    s3_hint:'Number of customers per product line.',
+    s4_title:'How many <em>new customers</em> do you think you can create or reactivate for SS27?',
+    s4_hint:'Total number per product line.',
+    s5_title:'What do you need from LOSAN to <em>achieve your best sales performance?</em>',
+    ph_needs:'Write your answer here...',err_needs:'Please write your answer.',
+    sending:'Saving your responses...',
+    ty_eyebrow:'SS27 — Thank you',ty_title:'Your vision<br><em>drives us forward.</em>',
+    ty_sub:'We have received your responses. Now access the LOSAN B2B portal to explore the SS27 collection.',
+    ty_btn:'Access B2B →',
+    step_labels:['Identification','Sales forecast','SS27 customers','New customers','Needs'],
+  },
+  fr:{
+    eyebrow_survey:'SS27 — Prévision des ventes',
+    s1_title:'Parlez-nous de vous <em>et de votre activité.</em>',
+    label_name:'Nom et prénom',ph_name:'Votre nom complet',err_name:'Veuillez entrer votre nom.',
+    label_email:'Adresse email',ph_email:'vous@entreprise.com',err_email:'Veuillez entrer un email valide.',
+    btn_continue:'Continuer →',btn_back:'← Retour',btn_send:'Envoyer →',
+    q_label_1:'Question 1 sur 4',q_label_2:'Question 2 sur 4',q_label_3:'Question 3 sur 4',q_label_4:'Question 4 sur 4',
+    s2_title:'Quelle est votre <em>prévision de ventes</em> LOSAN pour SS27?',
+    s2_hint:'Montant estimé en euros (€) par ligne de produit.',
+    th_line:'Ligne',th_forecast:'Prévision (€)',
+    s3_title:'À combien de <em>clients</em> pensez-vous vendre la collection SS27?',
+    s3_hint:'Nombre de clients par ligne de produit.',
+    s4_title:'Combien de <em>nouveaux clients</em> pensez-vous pouvoir créer ou réactiver pour SS27?',
+    s4_hint:'Nombre total par ligne de produit.',
+    s5_title:'De quoi avez-vous besoin de la part de LOSAN pour <em>atteindre votre meilleur niveau de ventes?</em>',
+    ph_needs:'Écrivez votre réponse ici...',err_needs:'Veuillez écrire votre réponse.',
+    sending:'Enregistrement des réponses...',
+    ty_eyebrow:'SS27 — Merci',ty_title:'Votre vision<br><em>nous propulse.</em>',
+    ty_sub:"Nous avons reçu vos réponses. Accédez maintenant au portail B2B LOSAN pour explorer la collection SS27.",
+    ty_btn:'Accéder au B2B →',
+    step_labels:['Identification','Prévision des ventes','Clients SS27','Nouveaux clients','Besoins'],
+  },
+  de:{
+    eyebrow_survey:'SS27 — Verkaufsvorschau',
+    s1_title:'Erzähl uns von dir <em>und deinem Geschäft.</em>',
+    label_name:'Vor- und Nachname',ph_name:'Dein vollständiger Name',err_name:'Bitte gib deinen Namen ein.',
+    label_email:'E-Mail-Adresse',ph_email:'du@firma.com',err_email:'Bitte gib eine gültige E-Mail ein.',
+    btn_continue:'Weiter →',btn_back:'← Zurück',btn_send:'Absenden →',
+    q_label_1:'Frage 1 von 4',q_label_2:'Frage 2 von 4',q_label_3:'Frage 3 von 4',q_label_4:'Frage 4 von 4',
+    s2_title:'Wie ist deine <em>Verkaufsprognose</em> für LOSAN SS27?',
+    s2_hint:'Geschätzter Betrag in Euro (€) pro Produktlinie.',
+    th_line:'Linie',th_forecast:'Prognose (€)',
+    s3_title:'An wie viele <em>Kunden</em> glaubst du, die SS27-Kollektion zu verkaufen?',
+    s3_hint:'Anzahl der Kunden pro Produktlinie.',
+    s4_title:'Wie viele <em>Neukunden</em> glaubst du für SS27 gewinnen oder reaktivieren zu können?',
+    s4_hint:'Gesamtanzahl pro Produktlinie.',
+    s5_title:'Was brauchst du von LOSAN, um <em>dein bestes Verkaufsniveau zu erreichen?</em>',
+    ph_needs:'Schreib deine Antwort hier...',err_needs:'Bitte schreib deine Antwort.',
+    sending:'Antworten werden gespeichert...',
+    ty_eyebrow:'SS27 — Danke',ty_title:'Deine Vision<br><em>treibt uns an.</em>',
+    ty_sub:'Wir haben deine Antworten erhalten. Greife jetzt auf das LOSAN B2B-Portal zu, um die SS27-Kollektion zu erkunden.',
+    ty_btn:'Zum B2B →',
+    step_labels:['Identifikation','Verkaufsprognose','SS27-Kunden','Neukunden','Bedürfnisse'],
+  },
+  pt:{
+    eyebrow_survey:'SS27 — Previsão de vendas',
+    s1_title:'Fala-nos sobre ti <em>e o teu negócio.</em>',
+    label_name:'Nome e apelido',ph_name:'O teu nome completo',err_name:'Por favor, introduz o teu nome.',
+    label_email:'Endereço de email',ph_email:'tu@empresa.com',err_email:'Por favor, introduz um email válido.',
+    btn_continue:'Continuar →',btn_back:'← Voltar',btn_send:'Enviar →',
+    q_label_1:'Pergunta 1 de 4',q_label_2:'Pergunta 2 de 4',q_label_3:'Pergunta 3 de 4',q_label_4:'Pergunta 4 de 4',
+    s2_title:'Qual é a tua <em>previsão de vendas</em> da LOSAN para SS27?',
+    s2_hint:'Montante estimado em euros (€) por linha de produto.',
+    th_line:'Linha',th_forecast:'Previsão (€)',
+    s3_title:'A quantos <em>clientes</em> achas que venderás a coleção SS27?',
+    s3_hint:'Número de clientes por linha de produto.',
+    s4_title:'Quantos <em>novos clientes</em> achas que poderás criar ou reativar para SS27?',
+    s4_hint:'Número total por linha de produto.',
+    s5_title:'O que precisas da LOSAN para <em>atingir o teu melhor nível de vendas?</em>',
+    ph_needs:'Escreve aqui a tua resposta...',err_needs:'Por favor, escreve a tua resposta.',
+    sending:'A guardar respostas...',
+    ty_eyebrow:'SS27 — Obrigado',ty_title:'A tua visão<br><em>impulsiona-nos.</em>',
+    ty_sub:'Recebemos as tuas respostas. Acede agora ao portal B2B da LOSAN para explorar a coleção SS27.',
+    ty_btn:'Aceder ao B2B →',
+    step_labels:['Identificação','Previsão de vendas','Clientes SS27','Novos clientes','Necessidades'],
+  },
+  it:{
+    eyebrow_survey:'SS27 — Previsione delle vendite',
+    s1_title:'Raccontaci di te <em>e della tua attività.</em>',
+    label_name:'Nome e cognome',ph_name:'Il tuo nome completo',err_name:'Inserisci il tuo nome.',
+    label_email:'Indirizzo email',ph_email:'tu@azienda.com',err_email:'Inserisci un email valido.',
+    btn_continue:'Continua →',btn_back:'← Indietro',btn_send:'Invia →',
+    q_label_1:'Domanda 1 di 4',q_label_2:'Domanda 2 di 4',q_label_3:'Domanda 3 di 4',q_label_4:'Domanda 4 di 4',
+    s2_title:'Qual è la tua <em>previsione di vendita</em> LOSAN per SS27?',
+    s2_hint:'Importo stimato in euro (€) per linea di prodotto.',
+    th_line:'Linea',th_forecast:'Previsione (€)',
+    s3_title:'A quanti <em>clienti</em> pensi di vendere la collezione SS27?',
+    s3_hint:'Numero di clienti per linea di prodotto.',
+    s4_title:'Quanti <em>nuovi clienti</em> pensi di poter creare o riattivare per SS27?',
+    s4_hint:'Numero totale per linea di prodotto.',
+    s5_title:'Di cosa hai bisogno da LOSAN per <em>raggiungere il tuo miglior livello di vendite?</em>',
+    ph_needs:'Scrivi qui la tua risposta...',err_needs:'Scrivi la tua risposta.',
+    sending:'Salvataggio risposte...',
+    ty_eyebrow:'SS27 — Grazie',ty_title:'La tua visione<br><em>ci spinge avanti.</em>',
+    ty_sub:'Abbiamo ricevuto le tue risposte. Accedi ora al portale B2B LOSAN per esplorare la collezione SS27.',
+    ty_btn:'Accedi al B2B →',
+    step_labels:['Identificazione','Previsione vendite','Clienti SS27','Nuovi clienti','Bisogni'],
+  },
+  ca:{
+    eyebrow_survey:'SS27 — Previsió de vendes',
+    s1_title:"Explica'ns sobre tu <em>i el teu negoci.</em>",
+    label_name:'Nom i cognom',ph_name:'El teu nom complet',err_name:'Si us plau, introdueix el teu nom.',
+    label_email:'Correu electrònic',ph_email:'tu@empresa.com',err_email:'Si us plau, introdueix un email vàlid.',
+    btn_continue:'Continuar →',btn_back:'← Enrere',btn_send:'Enviar →',
+    q_label_1:'Pregunta 1 de 4',q_label_2:'Pregunta 2 de 4',q_label_3:'Pregunta 3 de 4',q_label_4:'Pregunta 4 de 4',
+    s2_title:'Quina és la teva <em>previsió de vendes</em> de LOSAN per a SS27?',
+    s2_hint:"Import estimat en euros (€) per línia de producte.",
+    th_line:'Línia',th_forecast:'Previsió (€)',
+    s3_title:'A quants <em>clients</em> creus que vendràs la col·lecció SS27?',
+    s3_hint:'Nombre de clients per línia de producte.',
+    s4_title:'Quants <em>clients nous</em> creus que podràs crear o reactivar per a SS27?',
+    s4_hint:'Nombre total per línia de producte.',
+    s5_title:"Què necessites per part de LOSAN per <em>assolir el teu millor nivell de vendes?</em>",
+    ph_needs:'Escriu aquí la teva resposta...',err_needs:'Si us plau, escriu la teva resposta.',
+    sending:'Guardant respostes...',
+    ty_eyebrow:'SS27 — Gràcies',ty_title:"La teva visió<br><em>ens impulsa.</em>",
+    ty_sub:"Hem rebut les teves respostes. Ara accedeix al portal B2B de LOSAN per explorar la col·lecció SS27.",
+    ty_btn:'Accedir al B2B →',
+    step_labels:['Identificació','Previsió de vendes','Clients SS27','Clients nous','Necessitats'],
+  },
+};
+
+let currentLang = 'es';
+
+function setLang(lang) {
+  currentLang = lang;
+  // Update switcher buttons
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+  applyI18n();
+  updateHeaderStep();
+}
+
+function applyI18n() {
+  const d = LANGS[currentLang] || LANGS.es;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (d[k] !== undefined) el.textContent = d[k];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const k = el.getAttribute('data-i18n-html');
+    if (d[k] !== undefined) el.innerHTML = d[k];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const k = el.getAttribute('data-i18n-placeholder');
+    if (d[k] !== undefined) el.placeholder = d[k];
+  });
+}
+
+// ═══════════════════════════════════
+// FIREBASE
+// ═══════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyAk_d6JF0NuQtd-9h8GdpK9JEtfM4qn65I",
   authDomain: "traductorlosan.firebaseapp.com",
@@ -335,83 +497,81 @@ const firebaseConfig = {
   messagingSenderId: "883937975350",
   appId: "1:883937975350:web:4905dde97938f1b6ca8c97"
 };
-
-// Survey data goes to /surveys/ss27/ — completely separate from /sessions/
 const SURVEY_PATH = 'surveys/ss27';
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ── NAV ──
-const STEP_LABELS = {
-  1: 'Identificación',
-  2: 'Previsión de ventas',
-  3: 'Clientes SS27',
-  4: 'Clientes nuevos',
-  5: 'Necesidades',
-};
-
+// ═══════════════════════════════════
+// NAV
+// ═══════════════════════════════════
 function showView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(id)?.classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function updateHeaderStep(n) {
+  const d = LANGS[currentLang] || LANGS.es;
+  const step = n || parseInt(document.querySelector('.view.active')?.id?.replace('step','')) || 1;
+  if (step >= 1 && step <= 5) {
+    document.getElementById('header-step').textContent = `${step} / 5 — ${d.step_labels[step-1]}`;
+  }
 }
 
 function goStep(n) {
-  const current = parseInt(document.querySelector('.view.active')?.id?.replace('step','')) || 1;
-  if (n > current && !validateStep(current)) return;
-  const label = STEP_LABELS[n];
-  document.getElementById('header-step').textContent = label ? `${n} / 5 — ${label}` : '';
+  const cur = parseInt(document.querySelector('.view.active')?.id?.replace('step','')) || 1;
+  if (n > cur && !validateStep(cur)) return;
   showView('step' + n);
+  updateHeaderStep(n);
 }
 
-// ── VALIDATION ──
+// ═══════════════════════════════════
+// VALIDATION
+// ═══════════════════════════════════
 function validateStep(step) {
+  const d = LANGS[currentLang] || LANGS.es;
   if (step === 1) {
-    const nombre = v('nombre');
-    const mail = v('mail');
-    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const nombre = v('nombre'), mail = v('mail');
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     let ok = true;
-    if (!nombre) { showErr('nombre', 'Por favor, introduce tu nombre.'); ok = false; } else hideErr('nombre');
-    if (!emailRe.test(mail)) { showErr('mail', !mail ? 'Por favor, introduce un email.' : 'Email no válido.'); ok = false; } else hideErr('mail');
+    if (!nombre) { showErr('nombre', d.err_name); ok = false; } else hideErr('nombre');
+    if (!re.test(mail)) { showErr('mail', d.err_email); ok = false; } else hideErr('mail');
     return ok;
   }
   if (step === 5) {
     const needs = v('needs');
-    if (!needs) { showErr('needs', 'Por favor, escribe tu respuesta.'); return false; }
+    if (!needs) { showErr('needs', d.err_needs); return false; }
     hideErr('needs');
     return true;
   }
   return true;
 }
 
-function v(id) { return (document.getElementById(id)?.value || '').trim(); }
-function num(id) { const val = document.getElementById(id)?.value; return val ? parseInt(val) || 0 : 0; }
+function v(id) { return (document.getElementById(id)?.value||'').trim(); }
+function num(id) { const val=document.getElementById(id)?.value; return val?parseInt(val)||0:0; }
 
 function showErr(field, msg) {
-  const err = document.getElementById('err-' + field);
-  const wrap = document.getElementById('wrap-' + field);
-  if (err) { err.textContent = msg; err.classList.add('show'); }
-  if (wrap) wrap.classList.add('field-error');
+  const e = document.getElementById('err-'+field), w = document.getElementById('wrap-'+field);
+  if (e) { e.textContent=msg; e.classList.add('show'); }
+  if (w) w.classList.add('field-error');
 }
 function hideErr(field) {
-  document.getElementById('err-' + field)?.classList.remove('show');
-  document.getElementById('wrap-' + field)?.classList.remove('field-error');
+  document.getElementById('err-'+field)?.classList.remove('show');
+  document.getElementById('wrap-'+field)?.classList.remove('field-error');
 }
 
-// ── COLLECT ──
+// ═══════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════
 const CATS = ['man','woman','teen','kids','baby','newborn'];
-
 function getBlock(prefix) {
-  const data = {};
-  CATS.forEach(c => { data[c] = num(`${prefix}-${c}`); });
-  return data;
+  const d={};
+  CATS.forEach(c => { d[c]=num(`${prefix}-${c}`); });
+  return d;
 }
 
-// ── SUBMIT ──
 async function submitSurvey() {
   if (!validateStep(5)) return;
-
   const btn = document.getElementById('submit-btn');
   const sending = document.getElementById('sending-msg');
   btn.disabled = true;
@@ -419,6 +579,7 @@ async function submitSurvey() {
 
   const response = {
     timestamp: firebase.database.ServerValue.TIMESTAMP,
+    lang: currentLang,
     nombre: v('nombre'),
     mail: v('mail'),
     prevision_ventas: getBlock('sf'),
@@ -427,42 +588,39 @@ async function submitSurvey() {
     necesidades: v('needs'),
   };
 
-  try {
-    await db.ref(SURVEY_PATH).push(response);
-  } catch(err) {
-    console.error('Firebase write error:', err);
-    // Still proceed to thank you — don't block the user
-  }
+  try { await db.ref(SURVEY_PATH).push(response); }
+  catch(err) { console.error('Firebase write error:', err); }
 
-  document.getElementById('header-step').textContent = 'Completado';
+  document.getElementById('header-step').textContent = LANGS[currentLang]?.ty_eyebrow || 'SS27';
   showView('thankyou');
+  applyI18n();
 
   setTimeout(() => {
-    document.getElementById('b2b-qr').innerHTML = '';
-    new QRCode(document.getElementById('b2b-qr'), {
-      text: 'https://b2b.losan.com',
-      width: 200, height: 200,
-      colorDark: '#0a0a0a', colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.H
+    document.getElementById('b2b-qr').innerHTML='';
+    new QRCode(document.getElementById('b2b-qr'),{
+      text:'https://b2b.losan.com',
+      width:200,height:200,
+      colorDark:'#0a0a0a',colorLight:'#ffffff',
+      correctLevel:QRCode.CorrectLevel.H
     });
   }, 400);
 }
 
-// ── ADMIN ──
+// ═══════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════
 async function loadAdmin() {
   showView('admin');
-  document.getElementById('header-step').textContent = 'Panel de resultados';
+  document.getElementById('header-step').textContent = 'Admin — SS27';
 
   db.ref(SURVEY_PATH).on('value', snap => {
     const raw = snap.val();
-    const rows = raw ? Object.entries(raw).map(([k, v]) => ({ _key: k, ...v })) : [];
-
-    // Sort newest first
-    rows.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const rows = raw ? Object.entries(raw).map(([k,v])=>({_key:k,...v})) : [];
+    rows.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
 
     document.getElementById('admin-meta').textContent =
-      rows.length === 0 ? 'Sin respuestas todavía.' :
-      `${rows.length} respuesta${rows.length !== 1 ? 's' : ''} recibida${rows.length !== 1 ? 's' : ''}.`;
+      rows.length===0 ? 'Sin respuestas todavía.' :
+      `${rows.length} respuesta${rows.length!==1?'s':''}.`;
 
     renderSummary(rows);
     renderTable(rows);
@@ -470,128 +628,73 @@ async function loadAdmin() {
 }
 
 function renderSummary(rows) {
-  if (!rows.length) { document.getElementById('summary-wrap').innerHTML = ''; return; }
-
-  const totalVentas = CATS.reduce((acc, c) => {
-    return acc + rows.reduce((s, r) => s + (r.prevision_ventas?.[c] || 0), 0);
-  }, 0);
-
-  const totalClientes = CATS.reduce((acc, c) => {
-    return acc + rows.reduce((s, r) => s + (r.clientes_ss27?.[c] || 0), 0);
-  }, 0);
-
-  const totalNuevos = CATS.reduce((acc, c) => {
-    return acc + rows.reduce((s, r) => s + (r.clientes_nuevos?.[c] || 0), 0);
-  }, 0);
-
-  document.getElementById('summary-wrap').innerHTML = `
+  if (!rows.length) { document.getElementById('summary-wrap').innerHTML=''; return; }
+  const sum=(fn)=>rows.reduce((a,r)=>a+CATS.reduce((s,c)=>s+(fn(r)?.[c]||0),0),0);
+  const tv=sum(r=>r.prevision_ventas), tc=sum(r=>r.clientes_ss27), tn=sum(r=>r.clientes_nuevos);
+  document.getElementById('summary-wrap').innerHTML=`
     <div class="summary-grid">
-      <div class="summary-card">
-        <div class="summary-label">Respuestas</div>
-        <div class="summary-value">${rows.length}</div>
-        <div class="summary-sub">agentes</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label">Ventas totales SS27</div>
-        <div class="summary-value">${totalVentas.toLocaleString('es-ES')}€</div>
-        <div class="summary-sub">previsión agregada</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label">Clientes totales</div>
-        <div class="summary-value">${totalClientes.toLocaleString('es-ES')}</div>
-        <div class="summary-sub">cartera SS27</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label">Clientes nuevos</div>
-        <div class="summary-value">${totalNuevos.toLocaleString('es-ES')}</div>
-        <div class="summary-sub">captación/reactivación</div>
-      </div>
+      <div class="summary-card"><div class="summary-label">Respuestas</div><div class="summary-value">${rows.length}</div><div class="summary-sub">agentes</div></div>
+      <div class="summary-card"><div class="summary-label">Ventas SS27</div><div class="summary-value">${tv.toLocaleString('es-ES')}€</div><div class="summary-sub">previsión total</div></div>
+      <div class="summary-card"><div class="summary-label">Clientes</div><div class="summary-value">${tc.toLocaleString('es-ES')}</div><div class="summary-sub">cartera total</div></div>
+      <div class="summary-card"><div class="summary-label">Nuevos clientes</div><div class="summary-value">${tn.toLocaleString('es-ES')}</div><div class="summary-sub">captación</div></div>
     </div>`;
 }
 
 function renderTable(rows) {
-  if (!rows.length) {
-    document.getElementById('admin-table-wrap').innerHTML = '<div class="no-data">Las respuestas aparecerán aquí en tiempo real.</div>';
-    return;
-  }
-
-  const sfCols = CATS.map(c => `<th>Vtas ${c}</th>`).join('');
-  const ccCols = CATS.map(c => `<th>Cli ${c}</th>`).join('');
-  const ncCols = CATS.map(c => `<th>Nvo ${c}</th>`).join('');
-
-  const trs = rows.map(r => {
-    const sf = CATS.map(c => `<td class="num">${(r.prevision_ventas?.[c]||0).toLocaleString('es-ES')}€</td>`).join('');
-    const cc = CATS.map(c => `<td class="num">${r.clientes_ss27?.[c]||0}</td>`).join('');
-    const nc = CATS.map(c => `<td class="num">${r.clientes_nuevos?.[c]||0}</td>`).join('');
-    const dt = r.timestamp ? new Date(r.timestamp).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'}) : '—';
-    const needs = esc(r.necesidades || '');
-    return `<tr>
-      <td style="white-space:nowrap">${dt}</td>
-      <td><strong>${esc(r.nombre)}</strong></td>
-      <td style="color:var(--muted)">${esc(r.mail)}</td>
-      ${sf}${cc}${nc}
-      <td style="max-width:220px;font-size:0.75rem;line-height:1.5">${needs}</td>
-    </tr>`;
+  if (!rows.length) { document.getElementById('admin-table-wrap').innerHTML='<div class="no-data">Las respuestas aparecerán aquí.</div>'; return; }
+  const sfH=CATS.map(c=>`<th>Vtas ${c}</th>`).join('');
+  const ccH=CATS.map(c=>`<th>Cli ${c}</th>`).join('');
+  const ncH=CATS.map(c=>`<th>Nvo ${c}</th>`).join('');
+  const trs=rows.map(r=>{
+    const sf=CATS.map(c=>`<td class="num">${(r.prevision_ventas?.[c]||0).toLocaleString('es-ES')}€</td>`).join('');
+    const cc=CATS.map(c=>`<td class="num">${r.clientes_ss27?.[c]||0}</td>`).join('');
+    const nc=CATS.map(c=>`<td class="num">${r.clientes_nuevos?.[c]||0}</td>`).join('');
+    const dt=r.timestamp?new Date(r.timestamp).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'}):'—';
+    return `<tr><td style="white-space:nowrap">${dt}</td><td><strong style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">${r.lang?.toUpperCase()||'—'}</strong></td><td><strong>${esc(r.nombre)}</strong></td><td style="color:var(--muted)">${esc(r.mail)}</td>${sf}${cc}${nc}<td style="max-width:220px;font-size:0.75rem">${esc(r.necesidades)}</td></tr>`;
   }).join('');
-
-  document.getElementById('admin-table-wrap').innerHTML = `
-    <div style="overflow-x:auto;margin-top:1rem">
-      <table class="responses-table">
-        <thead><tr>
-          <th>Fecha</th><th>Nombre</th><th>Email</th>
-          ${sfCols}${ccCols}${ncCols}
-          <th>Necesidades</th>
-        </tr></thead>
-        <tbody>${trs}</tbody>
-      </table>
-    </div>`;
+  document.getElementById('admin-table-wrap').innerHTML=`<div style="overflow-x:auto;margin-top:1rem"><table class="responses-table"><thead><tr><th>Fecha</th><th>Idioma</th><th>Nombre</th><th>Email</th>${sfH}${ccH}${ncH}<th>Necesidades</th></tr></thead><tbody>${trs}</tbody></table></div>`;
 }
 
-function esc(str) {
-  const d = document.createElement('div');
-  d.textContent = str || '';
-  return d.innerHTML;
-}
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 
-// ── CSV EXPORT ──
 async function exportCSV() {
   const snap = await db.ref(SURVEY_PATH).get();
   const raw = snap.val();
-  if (!raw) { alert('No hay respuestas para exportar.'); return; }
-
-  const rows = Object.entries(raw).map(([k, v]) => ({ _key: k, ...v }));
-  rows.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-
-  const sfH = CATS.map(c => `Ventas_${c}`).join(';');
-  const ccH = CATS.map(c => `Clientes_${c}`).join(';');
-  const ncH = CATS.map(c => `NuevosClientes_${c}`).join(';');
-  const header = `Fecha;Nombre;Email;${sfH};${ccH};${ncH};Necesidades`;
-
-  const lines = rows.map(r => {
-    const dt = r.timestamp ? new Date(r.timestamp).toLocaleString('es-ES') : '';
-    const sf = CATS.map(c => r.prevision_ventas?.[c]||0).join(';');
-    const cc = CATS.map(c => r.clientes_ss27?.[c]||0).join(';');
-    const nc = CATS.map(c => r.clientes_nuevos?.[c]||0).join(';');
-    const needs = (r.necesidades||'').replace(/[\r\n;]/g,' ');
-    return `${dt};${r.nombre};${r.mail};${sf};${cc};${nc};${needs}`;
+  if (!raw) { alert('No hay respuestas.'); return; }
+  const rows=Object.entries(raw).map(([k,v])=>({_key:k,...v}));
+  rows.sort((a,b)=>(a.timestamp||0)-(b.timestamp||0));
+  const sfH=CATS.map(c=>`Ventas_${c}`).join(';');
+  const ccH=CATS.map(c=>`Clientes_${c}`).join(';');
+  const ncH=CATS.map(c=>`NuevosClientes_${c}`).join(';');
+  const hdr=`Fecha;Idioma;Nombre;Email;${sfH};${ccH};${ncH};Necesidades`;
+  const lines=rows.map(r=>{
+    const dt=r.timestamp?new Date(r.timestamp).toLocaleString('es-ES'):'';
+    const sf=CATS.map(c=>r.prevision_ventas?.[c]||0).join(';');
+    const cc=CATS.map(c=>r.clientes_ss27?.[c]||0).join(';');
+    const nc=CATS.map(c=>r.clientes_nuevos?.[c]||0).join(';');
+    return `${dt};${r.lang||''};${r.nombre};${r.mail};${sf};${cc};${nc};${(r.necesidades||'').replace(/[\r\n;]/g,' ')}`;
   });
-
-  const csv = '\uFEFF' + header + '\n' + lines.join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `LOSAN_SS27_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const csv='\uFEFF'+hdr+'\n'+lines.join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  a.download=`LOSAN_SS27_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
 }
 
-// ── INIT ──
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
+  // Auto-detect browser language
+  const nav = (navigator.language||'es').toLowerCase().split('-')[0];
+  const supported = Object.keys(LANGS);
+  const initial = supported.includes(nav) ? nav : 'es';
+  setLang(initial);
+  updateHeaderStep(1);
+
   const p = new URLSearchParams(window.location.search);
-  if (p.get('admin') === 'losan27') {
-    loadAdmin();
-  }
+  if (p.get('admin') === 'losan27') loadAdmin();
 });
 </script>
 </body>
