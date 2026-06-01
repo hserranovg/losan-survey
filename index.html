@@ -109,6 +109,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);-we
 .admin-scroll::-webkit-scrollbar-thumb{background:var(--line-dark);border-radius:2px;}
 .admin-scroll::-webkit-scrollbar-thumb:hover{background:var(--muted);}
 .admin-scroll{scrollbar-width:thin;scrollbar-color:var(--line-dark) var(--line);}
+.scroll-hint{
+  position:absolute;
+  right:0; top:0; bottom:0;
+  width:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.1rem;
+  color:var(--muted);
+  background:linear-gradient(to right, transparent, var(--bg) 60%);
+  pointer-events:none;
+  transition:opacity 0.4s;
+  animation:scrollPulse 1.8s ease-in-out infinite;
+}
+@keyframes scrollPulse{0%,100%{opacity:1;transform:translateX(0);}50%{opacity:0.3;transform:translateX(4px);}}
 .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;border-top:1px solid var(--line);border-left:1px solid var(--line);margin-bottom:2rem;}
 .summary-card{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:1rem 1.25rem;}
 .summary-label{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;}
@@ -658,7 +673,17 @@ function renderTable(rows) {
     const dt=r.timestamp?new Date(r.timestamp).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'}):'—';
     return `<tr><td style="white-space:nowrap">${dt}</td><td><strong style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">${r.lang?.toUpperCase()||'—'}</strong></td><td><strong>${esc(r.nombre)}</strong></td><td style="color:var(--muted)">${esc(r.mail)}</td>${sf}${cc}${nc}<td style="max-width:220px;font-size:0.75rem">${esc(r.necesidades)}</td></tr>`;
   }).join('');
-  document.getElementById('admin-table-wrap').innerHTML=`<div class="admin-scroll"><table class="responses-table"><thead><tr><th>Fecha</th><th>Idioma</th><th>Nombre</th><th>Email</th>${sfH}${ccH}${ncH}<th>Necesidades</th></tr></thead><tbody>${trs}</tbody></table></div>`;
+  document.getElementById('admin-table-wrap').innerHTML=`
+    <div style="position:relative;margin-top:1rem;">
+      <div class="admin-scroll"><table class="responses-table"><thead><tr><th>Fecha</th><th>Idioma</th><th>Nombre</th><th>Email</th>${sfH}${ccH}${ncH}<th>Necesidades</th></tr></thead><tbody>${trs}</tbody></table></div>
+      <div class="scroll-hint" id="scroll-hint">&#8594;</div>
+    </div>`;
+  // Hide arrow once user scrolls
+  setTimeout(()=>{
+    const sc=document.querySelector('.admin-scroll');
+    const hint=document.getElementById('scroll-hint');
+    if(sc&&hint){sc.addEventListener('scroll',()=>{hint.style.opacity='0';hint.style.pointerEvents='none';},{once:true});}
+  },100);
 }
 
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
